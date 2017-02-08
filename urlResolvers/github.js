@@ -1,10 +1,12 @@
 const URLResolver = require('./urlResolver');
-const GitHubAPIHandler = require('../sourceHandlers/github');
+const GitHubAPIHandler = require('../sourceHandlers/gitHub');
+const GitHandler = require('../sourceHandlers/git');
 
 const stripHttp = /^(http(s)?:\/\/)?(www.)?/;
 const urlRegex = /^github\.com\/([\w,-]+)\/([\w,-]+)/;
 
 const apiBaseUrl = 'https://api.github.com/';
+const gitBaseUrl = 'https://github.com/';
 
 /**
  * Creates the supported source handlers for a given URL.
@@ -14,15 +16,15 @@ const apiBaseUrl = 'https://api.github.com/';
  */
 class GitHubResolver extends URLResolver {
   static getSourceHandlers(url) {
-    const sourceHandlers = [];
     const repoInfo = this._parseURL(url);
     if (repoInfo != null) {
       const repoPath = `${repoInfo.owner}/${repoInfo.repoName}`;
+      const gitUrl = `${gitBaseUrl}${repoPath}.git`;
 
-      sourceHandlers.push(new GitHubAPIHandler(apiBaseUrl, repoPath));
+      return [new GitHubAPIHandler(apiBaseUrl, repoPath), new GitHandler(gitUrl)];
     }
 
-    return sourceHandlers;
+    return [];
   }
 
   static _parseURL(url) {
